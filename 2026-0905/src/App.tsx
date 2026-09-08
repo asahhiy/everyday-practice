@@ -5,21 +5,11 @@ const maskContainer = {
   hidden: {},
   visible: {
     transition: {
-      staggerChildren: 0.3,
+      staggerChildren: 0.1,
     },
   },
 }
 
-const maskPath = {
-  hidden: { pathLength: 0 },
-  visible: {
-    pathLength: 1,
-    transition: {
-      duration: 0.8,
-      ease: 'easeInOut',
-    },
-  },
-}
 
 const maskStroke = {
   hidden: { pathLength: 0, strokeOpacity: 0 },
@@ -27,11 +17,12 @@ const maskStroke = {
     pathLength: 1,
     strokeOpacity: 1,
     transition: {
-      pathLength: { duration: 0.8, ease: 'easeInOut' },
+      pathLength: { duration: 0.7, ease: 'easeInOut' as const },
       strokeOpacity: { duration: 0.1 },
     },
   },
 }
+
 
 function App() {
   return (
