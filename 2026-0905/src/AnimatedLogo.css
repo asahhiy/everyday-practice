@@ -1,0 +1,28 @@
+.logo-stage {
+  z-index: 1;
+}
+
+.logo-stage svg {
+  display: block;
+  height: auto;
+}
+
+.logo-stage.is-intro {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  width: min(90vw, 942px);
+  transform: translate(-50%, -50%);
+}
+
+.logo-stage.is-header {
+  position: relative;
+  left: auto;
+  top: auto;
+  width: 174px;
+  flex: 0 0 174px;
+}
+
+@media (max-width: 520px) {
+  .logo-stage.is-header { width: 150px; flex-basis: 150px; }
+}
