@@ -35,7 +35,7 @@ function App() {
         layout
         transition={{ layout: { duration: 0.68, ease: [0.16, 1, 0.3, 1] } }}
       >
-        <svg viewBox="0 0 942.4 183.95" width="100%">
+        <svg viewBox="0 0 942.4 130" width="100%">
           {/* --- 第1層：マスク（なぞる白い線） --- */}
           <defs>
             <mask id="text-mask">
