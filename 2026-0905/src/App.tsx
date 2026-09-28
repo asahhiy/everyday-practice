@@ -17,7 +17,7 @@ const maskStroke = {
     pathLength: 1,
     strokeOpacity: 1,
     transition: {
-      pathLength: { duration: 0.7, ease: 'easeInOut' as const },
+      pathLength: { duration: 0.3, ease: 'easeInOut' as const },
       strokeOpacity: { duration: 0.1 },
     },
   },
