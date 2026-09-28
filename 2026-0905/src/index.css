@@ -1,6 +1,17 @@
 @font-face {
   font-family: "Y1NanoLine-RegularDisplay";
-  src:
-    local("Y1NanoLine-RegularDisplay"),
-    url("../fonts/Y1NanoLine-RegularDisplay.otf") format("opentype");
+  src: local("Y1NanoLine-RegularDisplay"), url("../fonts/Y1NanoLine-RegularDisplay.otf") format("opentype");
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100%;
+}
+
+body {
+  background: #f8f7f4;
+  color: #171717;
 }

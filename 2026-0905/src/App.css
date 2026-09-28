@@ -1,9 +1,52 @@
-.blank {
-  width: auto;
-  height: 100px;
+#root {
+  min-height: 100vh;
 }
 
-.title {
-  font-family: "Y1NanoLine-RegularDisplay";
-  font-size: 10em;
+.site-header {
+  height: 76px;
+  display: flex;
+  align-items: center;
+  padding: 0 28px;
+  box-sizing: border-box;
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+
+.site-header.is-ready {
+  opacity: 1;
+}
+
+.site-name {
+  margin-left: 22px;
+  font: 600 14px/1 sans-serif;
+  letter-spacing: 0.14em;
+}
+
+.logo-stage {
+  z-index: 1;
+}
+
+.logo-stage svg {
+  display: block;
+  height: auto;
+}
+
+.logo-stage.is-intro {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  width: min(90vw, 942px);
+  transform: translate(-50%, -50%);
+}
+
+.logo-stage.is-header {
+  position: absolute;
+  left: 28px;
+  top: 18px;
+  width: 174px;
+}
+
+@media (max-width: 520px) {
+  .site-header { height: 64px; padding: 0 18px; }
+  .logo-stage.is-header { left: 18px; top: 15px; width: 150px; }
 }
