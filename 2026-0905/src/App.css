@@ -3,17 +3,38 @@
 }
 
 .site-header {
+  position: relative;
+  z-index: 2;
   height: 76px;
   display: flex;
   align-items: center;
   padding: 0 28px;
   box-sizing: border-box;
-  opacity: 0;
-  transition: opacity 180ms ease;
+  opacity: 1;
+}
+
+.site-header::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 2.5px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left center;
 }
 
 .site-header.is-ready {
   opacity: 1;
+}
+
+.site-header.is-ready::after {
+  animation: header-divider-reveal 520ms cubic-bezier(0.16, 1, 0.3, 1) 450ms both;
+}
+
+@keyframes header-divider-reveal {
+  to { transform: scaleX(1); }
 }
 
 .site-name {
@@ -40,13 +61,14 @@
 }
 
 .logo-stage.is-header {
-  position: absolute;
-  left: 28px;
-  top: 18px;
+  position: relative;
+  left: auto;
+  top: auto;
   width: 174px;
+  flex: 0 0 174px;
 }
 
 @media (max-width: 520px) {
   .site-header { height: 64px; padding: 0 18px; }
-  .logo-stage.is-header { left: 18px; top: 15px; width: 150px; }
+  .logo-stage.is-header { width: 150px; flex-basis: 150px; }
 }

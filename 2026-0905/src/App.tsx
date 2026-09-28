@@ -30,9 +30,7 @@ function App() {
   return (
     <>
       <header className={`site-header ${introComplete ? 'is-ready' : ''}`}>
-        {introComplete && <span className="site-name"></span>}
-      </header>
-      <motion.div
+        <motion.div
         className={`logo-stage ${introComplete ? 'is-header' : 'is-intro'}`}
         layout
         transition={{ layout: { duration: 0.68, ease: [0.16, 1, 0.3, 1] } }}
@@ -251,6 +249,8 @@ function App() {
           />
         </svg>
       </motion.div>
+      {introComplete && <span className="site-name"></span>}
+      </header>
     </>
   )
 }
