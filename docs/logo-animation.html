@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <title>UDONWORKS ロゴアニメーションの仕組み</title>
+    <style>
+      :root {
+        font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+        color: #171717;
+        background: #f6f4ef;
+        line-height: 1.75;
+        font-synthesis: none;
+      }
+
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body { margin: 0; }
+      a { color: inherit; text-underline-offset: 0.2em; }
+      code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+      code { font-size: 0.92em; }
+      pre { overflow-x: auto; margin: 0; padding: 1.2rem 1.4rem; background: #171717; color: #f6f4ef; border-radius: 8px; line-height: 1.65; }
+      pre code { font-size: 0.87rem; }
+      .page { max-width: 1040px; margin: auto; padding: 0 32px 96px; }
+      .topline { display: flex; justify-content: space-between; align-items: center; gap: 16px; min-height: 72px; border-bottom: 2.5px solid #171717; }
+      .wordmark { font-family: Impact, "Arial Narrow", sans-serif; font-size: 1.1rem; font-stretch: condensed; letter-spacing: 0.02em; }
+      .topline span:last-child, .eyebrow, .section-number, .timeline-axis, .source-link { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+      .topline span:last-child { font-size: 0.74rem; color: #64625f; }
+      header.intro { padding: 74px 0 60px; }
+      .eyebrow { margin: 0 0 20px; color: #a44f35; font-size: 0.79rem; letter-spacing: 0.12em; text-transform: uppercase; }
+      h1 { max-width: 860px; margin: 0; font-size: clamp(2.3rem, 5vw, 4.4rem); line-height: 1.17; letter-spacing: -0.045em; }
+      .lead { max-width: 730px; margin: 30px 0 0; font-size: 1.12rem; color: #4a4844; }
+      .summary { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 32px; }
+      .summary span { padding: 6px 12px; border: 1px solid #d2cec6; border-radius: 100px; color: #57544e; font-size: 0.8rem; }
+      section { padding: 48px 0; border-top: 1px solid #d7d2c9; }
+      .section-head { display: grid; grid-template-columns: 62px 1fr; gap: 6px; align-items: start; margin-bottom: 25px; }
+      .section-number { color: #a44f35; font-size: 0.9rem; padding-top: 8px; }
+      h2 { margin: 0; font-size: clamp(1.5rem, 3vw, 2.25rem); line-height: 1.3; letter-spacing: -0.03em; }
+      h3 { margin: 0 0 8px; font-size: 1.08rem; }
+      p { margin: 0 0 18px; }
+      .content { margin-left: 68px; }
+      .content > p { max-width: 760px; }
+      .timeline { margin: 34px 0 18px; }
+      .timeline-axis, .timeline-row { display: grid; grid-template-columns: 140px minmax(0, 1fr); gap: 16px; }
+      .timeline-axis { margin-bottom: 8px; color: #77736d; font-size: 0.73rem; }
+      .axis-track { position: relative; height: 22px; }
+      .axis-track span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
+      .axis-track span:first-child { left: 0; transform: none; }
+      .axis-track span:nth-child(2) { left: 51.14%; }
+      .axis-track span:nth-child(3) { left: 72.45%; }
+      .axis-track span:last-child { right: 0; transform: none; }
+      .timeline-row { align-items: center; min-height: 46px; border-top: 1px solid #e1dcd4; }
+      .timeline-row:last-child { border-bottom: 1px solid #e1dcd4; }
+      .timeline-label { font-size: 0.82rem; font-weight: 700; }
+      .track { position: relative; height: 18px; background: repeating-linear-gradient(to right, transparent 0, transparent calc(25% - 1px), #e6e0d8 calc(25% - 1px), #e6e0d8 25%); }
+      .bar { position: absolute; top: 3px; height: 12px; border-radius: 2px; }
+      .bar.mask { left: 0; width: 51.14%; background: #171717; }
+      .bar.dot { left: 51.14%; width: 5.68%; background: #bd664a; }
+      .bar.wait { left: 56.82%; width: 15.63%; background: #b8b2a8; }
+      .bar.layout { left: 72.45%; width: 19.32%; background: #171717; }
+      .bar.divider { left: 85.23%; width: 14.77%; background: #bd664a; }
+      .time-notes { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-top: 18px; }
+      .time-notes div { padding-top: 10px; border-top: 2px solid #d7d2c9; font-size: 0.79rem; color: #625e58; }
+      .time-notes strong { display: block; color: #171717; font-size: 0.87rem; }
+      .note { margin-top: 28px; padding: 17px 20px; background: #eae5db; border-left: 3px solid #bd664a; font-size: 0.9rem; }
+      .mechanism { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin: 30px 0; }
+      .mechanism article { padding: 20px; background: #eeebe4; min-height: 180px; }
+      .mechanism .micro { display: block; margin-bottom: 14px; color: #a44f35; font: 0.75rem ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+      .mechanism p { margin: 0; font-size: 0.88rem; color: #595650; }
+      .code-caption { margin: 27px 0 8px; font-size: 0.82rem; font-weight: 700; }
+      .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+      .two-col p { color: #595650; font-size: 0.92rem; }
+      .source-list { margin: 0; padding: 0; list-style: none; }
+      .source-list li { display: grid; grid-template-columns: minmax(0, 220px) 1fr; gap: 22px; padding: 16px 0; border-top: 1px solid #ded9d0; }
+      .source-list li:last-child { border-bottom: 1px solid #ded9d0; }
+      .source-list a { font-size: 0.85rem; overflow-wrap: anywhere; }
+      .source-list span { color: #5d5953; font-size: 0.87rem; }
+      footer { padding-top: 22px; border-top: 2.5px solid #171717; color: #77736d; font-size: 0.8rem; }
+
+      @media (max-width: 700px) {
+        .page { padding: 0 20px 64px; }
+        .topline { flex-wrap: wrap; padding: 14px 0; }
+        header.intro { padding: 54px 0 45px; }
+        section { padding: 38px 0; }
+        .section-head { grid-template-columns: 1fr; }
+        .section-number { padding: 0; }
+        .content { margin-left: 0; }
+        .mechanism, .two-col { grid-template-columns: 1fr; }
+        .mechanism article { min-height: 0; }
+        .time-notes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .timeline-axis, .timeline-row { grid-template-columns: 88px minmax(0, 1fr); gap: 8px; }
+        .timeline-label { font-size: 0.72rem; }
+        .axis-track span:nth-child(2) { display: none; }
+        .source-list li { grid-template-columns: 1fr; gap: 4px; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <div class="topline"><span class="wordmark">UDONWORKS.COM</span><span>IMPLEMENTATION NOTE / 2026-0905</span></div>
+
+      <header class="intro">
+        <p class="eyebrow">Animation anatomy</p>
+        <h1>ロゴはどう描かれ、<br />ヘッダーに収まるのか</h1>
+        <p class="lead">SVGのマスクで文字を順に見せ、最後にドットを落とす。完了を合図にReactの状態を切り替え、Motionがロゴをヘッダーへ移動する。区切り線はCSSで左から伸ばしている。</p>
+        <div class="summary" aria-label="実装の構成">
+          <span>React：完了状態</span><span>SVG + Motion：文字とドット</span><span>Motion layout：位置の移動</span><span>CSS：区切り線</span>
+        </div>
+      </header>
+
+      <main>
+        <section aria-labelledby="timeline-title">
+          <div class="section-head"><span class="section-number">01 /</span><h2 id="timeline-title">動く順番と時間</h2></div>
+          <div class="content">
+            <p>以下はコンポーネントの表示開始を0秒とした、おおよその時間。アニメーションは順番に一つずつ終わる構成ではなく、後半のロゴ移動と区切り線が重なる。</p>
+            <div class="timeline" role="img" aria-label="0〜1.8秒に文字のマスク、1.8〜2.0秒にドット、2.0〜2.55秒に待機、2.55〜3.23秒にロゴ移動、3.0〜3.52秒に区切り線が動く">
+              <div class="timeline-axis"><span>動作</span><div class="axis-track"><span>0s</span><span>1.8s</span><span>2.55s</span><span>3.52s</span></div></div>
+              <div class="timeline-row"><span class="timeline-label">文字を描く</span><div class="track"><span class="bar mask"></span></div></div>
+              <div class="timeline-row"><span class="timeline-label">ドット落下</span><div class="track"><span class="bar dot"></span></div></div>
+              <div class="timeline-row"><span class="timeline-label">完了後の待機</span><div class="track"><span class="bar wait"></span></div></div>
+              <div class="timeline-row"><span class="timeline-label">ロゴ移動</span><div class="track"><span class="bar layout"></span></div></div>
+              <div class="timeline-row"><span class="timeline-label">区切り線</span><div class="track"><span class="bar divider"></span></div></div>
+            </div>
+            <div class="time-notes">
+              <div><strong>0–1.8秒</strong>16本の線を0.1秒間隔で開始</div>
+              <div><strong>1.8–2.0秒</strong>ドットが上から落ちる</div>
+              <div><strong>2.0–2.55秒</strong>完了通知後、550ms待つ</div>
+              <div><strong>2.55–3.23秒</strong>ロゴのレイアウト移動</div>
+              <div><strong>3.0–3.52秒</strong>区切り線が左から伸びる</div>
+            </div>
+            <p class="note">時間は設定値から計算した目安。区切り線はロゴ移動の完了を待たず、移動開始から450ms後に描かれ始める。</p>
+          </div>
+        </section>
+
+        <section aria-labelledby="mask-title">
+          <div class="section-head"><span class="section-number">02 /</span><h2 id="mask-title">文字が「書かれる」仕組み</h2></div>
+          <div class="content">
+            <div class="mechanism">
+              <article><span class="micro">A / BASE</span><h3>完成形の文字</h3><p>12個の黒い <code>&lt;path&gt;</code> が、最初からSVG内にある。</p></article>
+              <article><span class="micro">B / MASK</span><h3>白いなぞり線</h3><p>16本の <code>motion</code> の線を <code>&lt;mask&gt;</code> 内で順番に伸ばす。白い部分だけが通る。</p></article>
+              <article><span class="micro">A × B / VISIBLE</span><h3>文字が現れる</h3><p>文字グループに <code>mask="url(#text-mask)"</code> を付け、線が通った範囲だけ見せる。</p></article>
+            </div>
+            <p>各線は <code>pathLength: 0 → 1</code> で全長まで描かれ、<code>strokeOpacity: 0 → 1</code> で白線が有効になる。親の <code>staggerChildren: 0.1</code> が開始を100msずつずらす。線1本の描画時間は300ms。</p>
+            <p class="code-caption">AnimatedLogo.tsx：マスクの主な設定</p>
+            <pre><code>const maskContainer = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.1 } },
+}
+
+const maskStroke = {
+  hidden: { pathLength: 0, strokeOpacity: 0 },
+  visible: {
+    pathLength: 1,
+    strokeOpacity: 1,
+    transition: {
+      pathLength: { duration: 0.3, ease: 'easeInOut' },
+      strokeOpacity: { duration: 0.1 },
+    },
+  },
+}</code></pre>
+          </div>
+        </section>
+
+        <section aria-labelledby="state-title">
+          <div class="section-head"><span class="section-number">03 /</span><h2 id="state-title">ドットが次の動きを始める</h2></div>
+          <div class="content two-col">
+            <div>
+              <h3>最後のSVGパーツ</h3>
+              <p>ドットはマスクの外にある独立した <code>motion.path</code>。表示開始から1.8秒後に、<code>y: -230 → 0</code> と回転 <code>-8 → 0</code> を0.2秒で動かす。</p>
+              <p>ドットの <code>onAnimationComplete</code> が親の <code>App</code> に完了を通知する。</p>
+            </div>
+            <div>
+              <h3>Reactの状態切り替え</h3>
+              <p><code>App</code> は通知から550ms後に <code>introComplete</code> を <code>true</code> にする。これでロゴのクラスが <code>is-intro</code> から <code>is-header</code> へ変わり、ヘッダーにも <code>is-ready</code> が付く。</p>
+              <p>この1回の状態変更が、ロゴの移動と区切り線の待機を同時に始める。</p>
+            </div>
+          </div>
+          <div class="content">
+            <p class="code-caption">App.tsx：完了を受けて状態を変える</p>
+            <pre><code>&lt;AnimatedLogo
+  isHeader={introComplete}
+  onDotAnimationComplete={() =&gt;
+    window.setTimeout(() =&gt; setIntroComplete(true), 550)
+  }
+/&gt;</code></pre>
+          </div>
+        </section>
+
+        <section aria-labelledby="layout-title">
+          <div class="section-head"><span class="section-number">04 /</span><h2 id="layout-title">中央からヘッダーへ移る</h2></div>
+          <div class="content">
+            <p>ロゴの <code>motion.div</code> は最初からヘッダーの子要素。導入中は <code>position: fixed</code> で画面中央に置き、完了後は <code>position: relative</code> のフレックス項目としてヘッダー内に収まる。</p>
+            <p><code>layout</code> を指定したMotionが、レイアウト変更時の位置と大きさを0.68秒でつなぐ。ヘッダーは <code>display: flex</code> と <code>align-items: center</code> で縦位置を決めるため、最終位置を <code>top</code> の数値で合わせる必要がない。</p>
+            <p class="code-caption">AnimatedLogo.tsx / AnimatedLogo.css：位置の切り替え</p>
+            <pre><code>&lt;motion.div
+  className={`logo-stage ${isHeader ? 'is-header' : 'is-intro'}`}
+  layout
+  transition={{ layout: { duration: 0.68, ease: [0.16, 1, 0.3, 1] } }}
+&gt;
+
+.logo-stage.is-intro {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  width: min(90vw, 942px);
+  transform: translate(-50%, -50%);
+}
+
+.logo-stage.is-header {
+  position: relative;
+  width: 174px;
+  flex: 0 0 174px;
+}</code></pre>
+            <p class="note">520px以下の画面では、ヘッダーの高さが64px、ロゴの幅が150pxになる。SVGの <code>viewBox="0 0 942.4 130"</code> は図形の下側の余白を詰めるための設定。</p>
+          </div>
+        </section>
+
+        <section aria-labelledby="divider-title">
+          <div class="section-head"><span class="section-number">05 /</span><h2 id="divider-title">区切り線はCSSで伸ばす</h2></div>
+          <div class="content">
+            <p>ヘッダーの <code>::after</code> が高さ2.5pxの線。初期状態では <code>scaleX(0)</code>、<code>is-ready</code> が付いてから450ms待ち、520msかけて <code>scaleX(1)</code> にする。左端を起点にしているため、右方向へ洗われるように見える。</p>
+            <p class="code-caption">App.css：線の開始条件</p>
+            <pre><code>.site-header::after {
+  height: 2.5px;
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+.site-header.is-ready::after {
+  animation: header-divider-reveal
+    520ms cubic-bezier(0.16, 1, 0.3, 1) 450ms both;
+}</code></pre>
+          </div>
+        </section>
+
+        <section aria-labelledby="sources-title">
+          <div class="section-head"><span class="section-number">06 /</span><h2 id="sources-title">変更する場所</h2></div>
+          <div class="content">
+            <ul class="source-list">
+              <li><a href="../2026-0905/src/AnimatedLogo.tsx">AnimatedLogo.tsx</a><span>マスク、ドット、ロゴのレイアウト移動、SVGの図形。</span></li>
+              <li><a href="../2026-0905/src/AnimatedLogo.css">AnimatedLogo.css</a><span>中央配置と、ヘッダーに収まった後の幅。</span></li>
+              <li><a href="../2026-0905/src/App.tsx">App.tsx</a><span>完了状態と、ドットが止まってからの550ms待機。</span></li>
+              <li><a href="../2026-0905/src/App.css">App.css</a><span>ヘッダーのレイアウトと区切り線のアニメーション。</span></li>
+            </ul>
+          </div>
+        </section>
+      </main>
+
+      <footer>この文書は現在の実装の設定値を説明しています。時間はブラウザーの描画状況により多少前後します。</footer>
+    </div>
+  </body>
+</html>
