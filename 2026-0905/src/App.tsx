@@ -24,32 +24,6 @@ const maskStroke = {
   },
 }
 
-// Model the fall and bounce as ballistic motion with constant gravity.
-const gravityMotion = (() => {
-  const drop = 230
-  const fallDuration = 0.6
-  const restitution = 0.2
-  const bounceDuration = 2 * restitution * fallDuration
-  const duration = fallDuration + bounceDuration
-  const steps = 60
-  const y: number[] = []
-  const times: number[] = []
-
-  for (let step = 0; step <= steps; step += 1) {
-    const time = (duration * step) / steps
-    const position = time <= fallDuration
-      ? -drop * (1 - time / fallDuration) ** 2
-      : drop * restitution ** 2 - (2 * drop * restitution / fallDuration) * (time - fallDuration)
-      + (drop / fallDuration ** 2) * (time - fallDuration) ** 2
-
-    times.push(step / steps)
-    y.push(position)
-  }
-
-  return { y, times, duration }
-})()
-
-
 function App() {
   const [introComplete, setIntroComplete] = useState(false)
 
@@ -68,9 +42,9 @@ function App() {
           <defs>
             <mask id="text-mask">
               <motion.g
-            variants={maskContainer}
-            initial="hidden"
-            animate="visible"
+                variants={maskContainer}
+                initial="hidden"
+                animate="visible"
               >
                 {/* u */}
                 <motion.polyline
@@ -267,13 +241,12 @@ function App() {
             className="falling-dot"
             d="M701.87,98.74l6.52,6.52v13.03l-6.52,6.52h-13.03l-6.52-6.52v-13.03l6.52-6.52h13.03Z"
             initial={{ y: -230, rotate: -8 }}
-        animate={{ y: gravityMotion.y, rotate: 0 }}
-        onAnimationComplete={() => setIntroComplete(true)}
-        transition={{
+            animate={{ y: 0, rotate: 0 }}
+            onAnimationComplete={() => window.setTimeout(() => setIntroComplete(true), 550)}
+            transition={{
               delay: 1.8,
-              duration: gravityMotion.duration,
-              times: gravityMotion.times,
-              ease: 'linear',
+              duration: 0.20,
+              ease: 'easeOut',
             }}
           />
         </svg>
