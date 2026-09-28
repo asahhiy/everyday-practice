@@ -68,10 +68,9 @@ function App() {
           <defs>
             <mask id="text-mask">
               <motion.g
-                variants={maskContainer}
-                initial="hidden"
-                animate="visible"
-                onAnimationComplete={() => setIntroComplete(true)}
+            variants={maskContainer}
+            initial="hidden"
+            animate="visible"
               >
                 {/* u */}
                 <motion.polyline
@@ -268,8 +267,9 @@ function App() {
             className="falling-dot"
             d="M701.87,98.74l6.52,6.52v13.03l-6.52,6.52h-13.03l-6.52-6.52v-13.03l6.52-6.52h13.03Z"
             initial={{ y: -230, rotate: -8 }}
-            animate={{ y: gravityMotion.y, rotate: 0 }}
-            transition={{
+        animate={{ y: gravityMotion.y, rotate: 0 }}
+        onAnimationComplete={() => setIntroComplete(true)}
+        transition={{
               delay: 1.8,
               duration: gravityMotion.duration,
               times: gravityMotion.times,
