@@ -23,6 +23,31 @@ const maskStroke = {
   },
 }
 
+// Model the fall and bounce as ballistic motion with constant gravity.
+const gravityMotion = (() => {
+  const drop = 230
+  const fallDuration = 0.6
+  const restitution = 0.2
+  const bounceDuration = 2 * restitution * fallDuration
+  const duration = fallDuration + bounceDuration
+  const steps = 60
+  const y: number[] = []
+  const times: number[] = []
+
+  for (let step = 0; step <= steps; step += 1) {
+    const time = (duration * step) / steps
+    const position = time <= fallDuration
+      ? -drop * (1 - time / fallDuration) ** 2
+      : drop * restitution ** 2 - (2 * drop * restitution / fallDuration) * (time - fallDuration)
+        + (drop / fallDuration ** 2) * (time - fallDuration) ** 2
+
+    times.push(step / steps)
+    y.push(position)
+  }
+
+  return { y, times, duration }
+})()
+
 
 function App() {
   return (
@@ -221,12 +246,23 @@ function App() {
           <path d="M472.79,124.81V12.26h48.57l9.18,9.18v50.35l-9.18,9.18,9.18,43.83h-18.51l-9.18-43.83h-11.25v43.83h-18.81ZM509.66,62.76l2.07-2.22v-27.84l-2.07-2.07h-18.07v32.13h18.07Z" />
           <path d="M581.18,62.02l26.95,62.79h-20.58l-17.77-41.46-8.89,16.29v25.17h-18.51V12.26h18.51v51.39l26.51-51.39h20.73l-26.95,49.76Z" />
           <path d="M652.41,44.69v-11.85l-2.22-2.22h-14.36l-2.22,2.22v23.4l2.22,2.22h26.36l9.18,9.18v47.98l-9.18,9.18h-38.21l-9.18-9.18v-23.25h18.81v12l2.22,2.22h14.36l2.22-2.22v-25.47l-2.22-2.22h-26.21l-9.18-9.18V21.44l9.18-9.18h38.21l9.18,9.18v23.25h-18.96Z" />
-          <path d="M701.87,98.74l6.52,6.52v13.03l-6.52,6.52h-13.03l-6.52-6.52v-13.03l6.52-6.52h13.03Z" />
           <path d="M720.38,115.63V21.44l9.18-9.18h37.91l9.18,9.18v23.25h-18.81v-11.85l-2.22-2.22h-14.22l-2.22,2.22v71.38l2.22,2.22h14.22l2.22-2.22v-11.85h18.81v23.25l-9.18,9.18h-37.91l-9.18-9.18Z" />
           <path d="M844.48,21.44v94.18l-9.18,9.18h-37.91l-9.18-9.18V21.44l9.18-9.18h37.91l9.18,9.18ZM823.3,30.62h-14.22l-2.07,2.07v71.82l2.07,2.07h14.22l2.22-2.07V32.7l-2.22-2.07Z" />
           <path d="M904.31,100.67h-9.77l-18.21-51.83v75.97h-18.81V12.26h23.4l18.51,53.16,18.51-53.16h23.4v112.55h-18.81V48.84l-18.21,51.83Z" />
         </g>
       </g>
+      <motion.path
+        className="falling-dot"
+        d="M701.87,98.74l6.52,6.52v13.03l-6.52,6.52h-13.03l-6.52-6.52v-13.03l6.52-6.52h13.03Z"
+        initial={{ y: -230, rotate: -8 }}
+        animate={{ y: gravityMotion.y, rotate: 0 }}
+        transition={{
+          delay: 1.8,
+          duration: gravityMotion.duration,
+          times: gravityMotion.times,
+          ease: 'linear',
+        }}
+      />
     </svg>
   )
 }
